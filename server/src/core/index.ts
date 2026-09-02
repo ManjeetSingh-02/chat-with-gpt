@@ -26,4 +26,3 @@ export { SuccessResponse } from './response/success.js';
 
 // types
 export type { ValidatedRequest } from './types/request.js';
-export type { IErrorResponse, ISuccessResponse } from './types/response.js';

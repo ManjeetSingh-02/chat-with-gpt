@@ -1,12 +1,12 @@
 // internal-imports
-import type { IErrorResponse } from '../types/response.js';
+import type { ErrorResponse } from '../response/error.js';
 
 // external-imports
 import type { NextFunction, Request, Response } from 'express';
 
 // middleware function to handle errors
 export function errorHandler(
-  error: IErrorResponse,
+  error: ErrorResponse,
   _request: Request,
   response: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

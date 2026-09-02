@@ -1,8 +1,5 @@
-// type-imports
-import type { IErrorResponse } from '../types/response.js';
-
 // class to standardize API Error Response
-export class ErrorResponse<I = undefined> extends Error implements IErrorResponse<I> {
+export class ErrorResponse<I = undefined> extends Error {
   readonly success = false;
   readonly message: string;
   readonly code: number;
