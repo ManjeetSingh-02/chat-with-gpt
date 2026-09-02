@@ -3,8 +3,6 @@ import { auth } from '@/core/index.js';
 
 // external-imports
 import { toNodeHandler } from 'better-auth/node';
-
-// type-imports
 import type { Application } from 'express';
 
 // register module routes

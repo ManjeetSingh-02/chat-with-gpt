@@ -1,7 +1,7 @@
 // internal-imports
 import { router } from './route.js';
 
-// type-imports
+// external-imports
 import type { Application } from 'express';
 
 // register module routes

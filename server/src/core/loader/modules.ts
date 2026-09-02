@@ -7,8 +7,6 @@ import { logger } from '../logger/winston.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-// type-imports
 import type { Application } from 'express';
 
 // function to initialize all modules

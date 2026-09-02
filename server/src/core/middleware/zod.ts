@@ -3,8 +3,6 @@ import { ErrorResponse } from '../response/error.js';
 
 // external-imports
 import z from 'zod';
-
-// type-imports
 import type { Request, Response, NextFunction } from 'express';
 
 // type for validated request data
