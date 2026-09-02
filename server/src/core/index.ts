@@ -13,6 +13,9 @@ export { logger } from './logger/winston.js';
 export { errorHandler } from './middleware/error.js';
 export { validateZodSchema } from './middleware/zod.js';
 
+// prisma
+export { prisma } from './prisma/client.js';
+
 // response
 export { ErrorResponse } from './response/error.js';
 export { SuccessResponse } from './response/success.js';
