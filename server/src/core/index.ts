@@ -25,4 +25,4 @@ export { ErrorResponse } from './response/error.js';
 export { SuccessResponse } from './response/success.js';
 
 // types
-export type { ValidatedRequest } from './types/request.js';
+export type { Authenticated, Validated } from './types/request.js';
