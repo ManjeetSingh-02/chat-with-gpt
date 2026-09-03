@@ -7,9 +7,9 @@ declare global {
         id: string;
       };
       validated?: {
-        body: unknown;
-        query: unknown;
-        params: unknown;
+        body?: unknown;
+        query?: unknown;
+        params?: unknown;
       };
     }
   }

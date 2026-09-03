@@ -5,15 +5,8 @@ import { ErrorResponse } from '../response/error.js';
 import z from 'zod';
 import type { Request, Response, NextFunction } from 'express';
 
-// type for validated request data
-type ValidatedRequestData = {
-  body: unknown;
-  query: unknown;
-  params: unknown;
-};
-
 // function for validating request body using zod schema
-export function validateZodSchema<T extends ValidatedRequestData>(schema: z.ZodType<T>) {
+export function validateZodSchema<T extends z.ZodObject>(schema: T) {
   return function (request: Request, _response: Response, next: NextFunction) {
     // validate request against the provided schema
     const result = schema.safeParse({
