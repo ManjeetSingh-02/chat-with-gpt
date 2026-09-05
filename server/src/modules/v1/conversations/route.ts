@@ -18,6 +18,15 @@ router.get(
   controller.listConversations as RequestHandler
 );
 
+// @route GET /:id
+router.get(
+  '/:id',
+  authenticate,
+  validateZodSchema(conversationIdSchema),
+  checkConversationOwnership as RequestHandler,
+  controller.listMessages as RequestHandler
+);
+
 // @route POST /
 router.post('/', authenticate, controller.createConversation as RequestHandler);
 

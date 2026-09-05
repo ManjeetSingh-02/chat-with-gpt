@@ -127,4 +127,34 @@ export const controller = {
     // return response with success
     return response.status(204).send();
   },
+
+  // @controller GET /:id
+  listMessages: async (
+    request: Request & Validated<typeof conversationIdSchema>,
+    response: Response
+  ) => {
+    // find all messages
+    const messages = await prisma.message.findMany({
+      where: {
+        conversationId: request.validated.params.id,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+      select: {
+        id: true,
+        role: true,
+        parts: true,
+      },
+    });
+
+    // return response with success
+    return response.status(200).json(
+      new SuccessResponse({
+        message: 'Messages retrieved successfully',
+        data: messages,
+      })
+    );
+  },
+
 };
