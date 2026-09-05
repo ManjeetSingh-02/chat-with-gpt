@@ -2,6 +2,7 @@
 export { APP_CONFIG } from './config/constants.js';
 export { corsConfig } from './config/cors.js';
 export { env } from './config/env.js';
+export { OPENAI_CONFIG } from './config/openai.js';
 
 // lib
 export { auth } from './lib/auth.js';
