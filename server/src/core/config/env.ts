@@ -18,6 +18,7 @@ const envSchema = z.object({
   BETTER_AUTH_URL: z.url({ message: 'BETTER_AUTH_URL must be a valid URL' }),
   GOOGLE_CLIENT_ID: z.string().nonempty({ error: 'GOOGLE_CLIENT_ID is required' }),
   GOOGLE_CLIENT_SECRET: z.string().nonempty({ error: 'GOOGLE_CLIENT_SECRET is required' }),
+  OPENAI_API_KEY: z.string().nonempty({ error: 'OPENAI_API_KEY is required' }),
 });
 
 // function to validate environment variables
