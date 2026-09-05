@@ -1,18 +1,29 @@
 // internal-imports
 import {
   ErrorResponse,
+  OPENAI_CONFIG,
   prisma,
   SuccessResponse,
   type Authenticated,
+  type Prisma,
   type Validated,
 } from '@/core/index.js';
 import type {
   conversationIdSchema,
   listConversationsSchema,
   updateConversationSchema,
+  createMessageSchema,
 } from './zod.js';
 
 // external-imports
+import { openai } from '@ai-sdk/openai';
+import {
+  convertToModelMessages,
+  pipeUIMessageStreamToResponse,
+  streamText,
+  toUIMessageStream,
+  validateUIMessages,
+} from 'ai';
 import type { Request, Response } from 'express';
 
 // controller for module
@@ -157,4 +168,67 @@ export const controller = {
     );
   },
 
+  // @controller POST /:id
+  createMessage: async (
+    request: Request & Validated<typeof createMessageSchema>,
+    response: Response
+  ) => {
+    // find all messages
+    const messages = await prisma.message.findMany({
+      where: {
+        conversationId: request.validated.params.id,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+      select: {
+        id: true,
+        role: true,
+        parts: true,
+      },
+    });
+
+    // validate all the messages and the new message
+    const validatedMessages = await validateUIMessages({
+      messages: [...messages, request.validated.body.message],
+    });
+
+    // convert the validated messages to model messages
+    const modelMessages = await convertToModelMessages(validatedMessages);
+
+    // stream text from openai
+    const result = streamText({
+      model: openai(OPENAI_CONFIG.model),
+      system: OPENAI_CONFIG.SYSTEM_PROMPT,
+      messages: modelMessages,
+    });
+
+    // consume the stream
+    result.consumeStream();
+
+    // convert model stream into UI message stream
+    const stream = toUIMessageStream({
+      stream: result.stream,
+      originalMessages: validatedMessages,
+      onEnd: async ({ messages }) => {
+        for (const m of messages) {
+          await prisma.message.upsert({
+            where: {
+              id: m.id,
+            },
+            update: {},
+            create: {
+              id: m.id,
+              conversationId: request.validated.params.id,
+              role: m.role,
+              parts: m.parts as Prisma.InputJsonValue,
+            },
+          });
+        }
+      },
+    });
+
+    // pipe UI message stream directly to Express response
+    return pipeUIMessageStreamToResponse({ response, stream });
+  },
 };

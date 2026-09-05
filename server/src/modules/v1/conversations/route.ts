@@ -2,7 +2,12 @@
 import { authenticate, validateZodSchema } from '@/core/index.js';
 import { checkConversationOwnership } from './middleware.js';
 import { controller } from './controller.js';
-import { conversationIdSchema, listConversationsSchema, updateConversationSchema } from './zod.js';
+import {
+  conversationIdSchema,
+  createMessageSchema,
+  listConversationsSchema,
+  updateConversationSchema,
+} from './zod.js';
 
 // external-imports
 import { Router, type RequestHandler } from 'express';
@@ -29,6 +34,15 @@ router.get(
 
 // @route POST /
 router.post('/', authenticate, controller.createConversation as RequestHandler);
+
+// @route POST /:id
+router.post(
+  '/:id',
+  authenticate,
+  validateZodSchema(createMessageSchema),
+  checkConversationOwnership as RequestHandler,
+  controller.createMessage as RequestHandler
+);
 
 // @route PATCH /:id
 router.patch(

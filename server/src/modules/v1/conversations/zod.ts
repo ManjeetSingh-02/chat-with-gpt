@@ -39,3 +39,11 @@ export const updateConversationSchema = z.object({
       error: 'A conversation cannot be both pinned and archived',
     }),
 });
+
+// schema for createMessage
+export const createMessageSchema = z.object({
+  params: conversationIdParamsSchema,
+  body: z.object({
+    message: z.unknown(),
+  }),
+});
