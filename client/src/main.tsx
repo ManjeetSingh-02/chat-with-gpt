@@ -1,13 +1,13 @@
-// internal-imports
 import '@/index.css';
-import App from '@/App';
-
-// external-imports
+import { routeTree } from '@/routeTree.gen';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { RouterProvider, createRouter } from '@tanstack/react-router';
+
+const router = createRouter({ routeTree });
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <RouterProvider router={router} />
   </StrictMode>
 );
