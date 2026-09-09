@@ -1,5 +1,12 @@
-import { createRootRoute, Outlet } from '@tanstack/react-router';
+import { authClient } from '@/lib/auth-client';
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
+import type { QueryClient } from '@tanstack/react-query';
 
-export const Route = createRootRoute({
-  component: () => <Outlet />,
+type RouterContext = {
+  session: Awaited<ReturnType<typeof authClient.getSession>>;
+  queryClient: QueryClient;
+};
+
+export const Route = createRootRouteWithContext<RouterContext>()({
+  component: Outlet,
 });
