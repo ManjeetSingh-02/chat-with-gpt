@@ -53,6 +53,9 @@ router.patch(
   controller.updateConversation as RequestHandler
 );
 
+// @route DELETE /
+router.delete('/', authenticate, controller.deleteAllConversations as RequestHandler);
+
 // @route DELETE /:id
 router.delete(
   '/:id',

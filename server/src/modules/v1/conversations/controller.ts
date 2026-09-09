@@ -123,6 +123,19 @@ export const controller = {
     return response.status(204).send();
   },
 
+  // @controller DELETE /
+  deleteAllConversations: async (request: Request & Authenticated, response: Response) => {
+    // delete all conversations for the user
+    await prisma.conversation.deleteMany({
+      where: {
+        userId: request.user.id,
+      },
+    });
+
+    // return response with success
+    return response.status(204).send();
+  },
+
   // @controller DELETE /:id
   deleteConversation: async (
     request: Request & Validated<typeof conversationIdSchema>,
