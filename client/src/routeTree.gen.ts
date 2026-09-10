@@ -10,39 +10,72 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as appRouteRouteImport } from './routes/(app)/route'
+import { Route as appSettingsRouteImport } from './routes/(app)/settings'
 import { Route as authIndexRouteImport } from './routes/(auth)/index'
+import { Route as appConversationsIndexRouteImport } from './routes/(app)/conversations/index'
+import { Route as appConversationsIdRouteImport } from './routes/(app)/conversations/$id'
 
 const appRouteRoute = appRouteRouteImport.update({
   id: '/(app)',
   getParentRoute: () => rootRouteImport,
+} as any)
+const appSettingsRoute = appSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => appRouteRoute,
 } as any)
 const authIndexRoute = authIndexRouteImport.update({
   id: '/(auth)/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appConversationsIndexRoute = appConversationsIndexRouteImport.update({
+  id: '/conversations/',
+  path: '/conversations/',
+  getParentRoute: () => appRouteRoute,
+} as any)
+const appConversationsIdRoute = appConversationsIdRouteImport.update({
+  id: '/conversations/$id',
+  path: '/conversations/$id',
+  getParentRoute: () => appRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
+  '/settings': typeof appSettingsRoute
   '/': typeof authIndexRoute
+  '/conversations/$id': typeof appConversationsIdRoute
+  '/conversations/': typeof appConversationsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/settings': typeof appSettingsRoute
   '/': typeof authIndexRoute
+  '/conversations/$id': typeof appConversationsIdRoute
+  '/conversations': typeof appConversationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/(app)': typeof appRouteRoute
+  '/(app)': typeof appRouteRouteWithChildren
+  '/(app)/settings': typeof appSettingsRoute
   '/(auth)/': typeof authIndexRoute
+  '/(app)/conversations/$id': typeof appConversationsIdRoute
+  '/(app)/conversations/': typeof appConversationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/settings' | '/' | '/conversations/$id' | '/conversations/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/(app)' | '/(auth)/'
+  to: '/settings' | '/' | '/conversations/$id' | '/conversations'
+  id:
+    | '__root__'
+    | '/(app)'
+    | '/(app)/settings'
+    | '/(auth)/'
+    | '/(app)/conversations/$id'
+    | '/(app)/conversations/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  appRouteRoute: typeof appRouteRoute
+  appRouteRoute: typeof appRouteRouteWithChildren
   authIndexRoute: typeof authIndexRoute
 }
 
@@ -55,6 +88,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/settings': {
+      id: '/(app)/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof appSettingsRouteImport
+      parentRoute: typeof appRouteRoute
+    }
     '/(auth)/': {
       id: '/(auth)/'
       path: '/'
@@ -62,11 +102,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/conversations/': {
+      id: '/(app)/conversations/'
+      path: '/conversations'
+      fullPath: '/conversations/'
+      preLoaderRoute: typeof appConversationsIndexRouteImport
+      parentRoute: typeof appRouteRoute
+    }
+    '/(app)/conversations/$id': {
+      id: '/(app)/conversations/$id'
+      path: '/conversations/$id'
+      fullPath: '/conversations/$id'
+      preLoaderRoute: typeof appConversationsIdRouteImport
+      parentRoute: typeof appRouteRoute
+    }
   }
 }
 
+interface appRouteRouteChildren {
+  appSettingsRoute: typeof appSettingsRoute
+  appConversationsIdRoute: typeof appConversationsIdRoute
+  appConversationsIndexRoute: typeof appConversationsIndexRoute
+}
+
+const appRouteRouteChildren: appRouteRouteChildren = {
+  appSettingsRoute: appSettingsRoute,
+  appConversationsIdRoute: appConversationsIdRoute,
+  appConversationsIndexRoute: appConversationsIndexRoute,
+}
+
+const appRouteRouteWithChildren = appRouteRoute._addFileChildren(
+  appRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  appRouteRoute: appRouteRoute,
+  appRouteRoute: appRouteRouteWithChildren,
   authIndexRoute: authIndexRoute,
 }
 export const routeTree = rootRouteImport
