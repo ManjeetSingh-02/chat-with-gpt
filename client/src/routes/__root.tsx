@@ -4,7 +4,7 @@ import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 
 type RouterContext = {
-  session: Awaited<ReturnType<typeof authClient.getSession>>;
+  session: Awaited<ReturnType<typeof authClient.useSession>>['data'];
   queryClient: QueryClient;
 };
 
