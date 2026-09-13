@@ -11,7 +11,6 @@ const router = createRouter({
   routeTree,
   context: {
     session: null,
-    queryClient,
   },
 });
 
@@ -37,7 +36,7 @@ export default function App() {
       <ThemeProvider>
         <RouterProvider
           router={router}
-          context={{ session, queryClient }}
+          context={{ session }}
         />
       </ThemeProvider>
     </QueryClientProvider>
