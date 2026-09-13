@@ -15,20 +15,17 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { authClient } from '@/lib/auth-client';
+import type { Conversation } from '@/types/conversations';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
 import { Bot, ChevronDown, Compass, LogOut, Plus, Settings, User } from 'lucide-react';
 import { useState } from 'react';
 
 interface IAppSidebar {
-  groups: {
-    label: string;
-    conversations: {
-      id: string;
-      title: string;
-    }[];
-  }[];
-
+  conversations: {
+    pinned: Conversation[];
+    recents: Conversation[];
+  };
   user: {
     image: string | undefined | null;
     name: string;
@@ -36,7 +33,7 @@ interface IAppSidebar {
   };
 }
 
-export function AppSidebar({ user, groups }: IAppSidebar) {
+export function AppSidebar({ conversations, user }: IAppSidebar) {
   async function signOut() {
     await authClient.signOut();
   }
@@ -69,8 +66,11 @@ export function AppSidebar({ user, groups }: IAppSidebar) {
 
           <Separator className="mt-3 mb-2 group-data-[collapsible=icon]:hidden" />
 
-          <div className="flex w-full gap-2 group-data-[collapsible=icon]:flex-col">
-            <Link to="/conversations">
+          <div className="flex w-full gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
+            <Link
+              to="/conversations"
+              className="group-data-[collapsible=icon]:flex-1"
+            >
               <SidebarButton title="New chat">
                 <Plus />
                 <span className="group-data-[collapsible=icon]:hidden">New chat</span>
@@ -85,7 +85,10 @@ export function AppSidebar({ user, groups }: IAppSidebar) {
               orientation="horizontal"
               className="hidden group-data-[collapsible=icon]:block"
             />
-            <Link to="/conversations">
+            <Link
+              to="/conversations"
+              className="group-data-[collapsible=icon]:flex-1"
+            >
               <SidebarButton title="Explore">
                 <Compass />
                 <span className="group-data-[collapsible=icon]:hidden">Explore</span>
@@ -96,13 +99,16 @@ export function AppSidebar({ user, groups }: IAppSidebar) {
       </SidebarHeader>
 
       <SidebarContent className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        {groups.map(g => (
+        {conversations.pinned.length > 0 && (
           <NavigationGroup
-            key={g.label}
-            label={g.label}
-            conversations={g.conversations}
+            label="Pinned"
+            conversations={conversations.pinned}
           />
-        ))}
+        )}
+        <NavigationGroup
+          label="Recents"
+          conversations={conversations.recents}
+        />
       </SidebarContent>
 
       <SidebarFooter className="mb-1 shrink-0 p-3">
@@ -123,8 +129,11 @@ export function AppSidebar({ user, groups }: IAppSidebar) {
 
           <Separator className="mt-3 mb-2 group-data-[collapsible=icon]:hidden" />
 
-          <div className="flex w-full gap-2 group-data-[collapsible=icon]:flex-col">
-            <Link to="/settings">
+          <div className="flex w-full gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
+            <Link
+              to="/settings"
+              className="group-data-[collapsible=icon]:flex-1"
+            >
               <SidebarButton title="Settings">
                 <Settings />
                 <span className="group-data-[collapsible=icon]:hidden">Settings</span>
@@ -142,6 +151,7 @@ export function AppSidebar({ user, groups }: IAppSidebar) {
 
             <SidebarButton
               title="Log out"
+              className="hover:text-destructive"
               onClick={signOut}
             >
               <LogOut />
@@ -154,14 +164,20 @@ export function AppSidebar({ user, groups }: IAppSidebar) {
   );
 }
 
-function NavigationGroup({ conversations, label }: IAppSidebar['groups'][0]) {
+function NavigationGroup({
+  conversations,
+  label,
+}: {
+  conversations: Conversation[];
+  label: string;
+}) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel
         render={<button type="button" />}
-        className="w-full justify-start gap-1 pr-2"
+        className="hover:text-accent-foreground w-full justify-start gap-1 pr-2"
         onClick={() => setIsCollapsed(collapsed => !collapsed)}
       >
         <span>{label}</span>
@@ -193,17 +209,24 @@ function NavigationGroup({ conversations, label }: IAppSidebar['groups'][0]) {
   );
 }
 
-type SidebarButtonProps = {
+function SidebarButton({
+  title,
+  className,
+  onClick,
+  children,
+}: {
   title: string;
+  className?: string;
   onClick?: () => void;
   children: React.ReactNode;
-};
-
-function SidebarButton({ title, onClick, children }: SidebarButtonProps) {
+}) {
   return (
     <Button
       variant="ghost"
-      className="text-muted-foreground hover:text-primary min-w-0 flex-1 transition-colors group-data-[collapsible=icon]:px-1 hover:bg-transparent"
+      className={cn(
+        'text-muted-foreground hover:text-primary min-w-0 transition-colors group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:px-1 hover:bg-transparent',
+        className
+      )}
       title={title}
       onClick={onClick}
     >
