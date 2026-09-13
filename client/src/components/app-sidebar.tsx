@@ -1,5 +1,25 @@
+import { auth } from '@/api/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Field } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import {
   Sidebar,
@@ -14,29 +34,44 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { authClient } from '@/lib/auth-client';
+import { Spinner } from '@/components/ui/spinner';
+import {
+  useConversations,
+  useCreateConversation,
+  useDeleteConversation,
+  useUpdateConversation,
+} from '@/hooks/use-conversation';
 import type { Conversation } from '@/types/conversations';
 import { Link } from '@tanstack/react-router';
 import { cn } from 'cn';
-import { Bot, ChevronDown, Compass, LogOut, Plus, Settings, User } from 'lucide-react';
+import {
+  Archive,
+  Bot,
+  ChevronDown,
+  Compass,
+  Ellipsis,
+  LogOut,
+  Pencil,
+  PinIcon,
+  PinOff,
+  Plus,
+  Settings,
+  Trash,
+  User,
+} from 'lucide-react';
 import { useState } from 'react';
 
-interface IAppSidebar {
-  conversations: {
-    pinned: Conversation[];
-    recents: Conversation[];
-  };
+type AppSidebarProps = {
   user: {
     image: string | undefined | null;
     name: string;
     email: string;
   };
-}
+};
 
-export function AppSidebar({ conversations, user }: IAppSidebar) {
-  async function signOut() {
-    await authClient.signOut();
-  }
+export function AppSidebar({ user }: AppSidebarProps) {
+  const { data, isLoading, isError, error } = useConversations();
+  const useCreateConversationMutation = useCreateConversation();
 
   return (
     <Sidebar
@@ -71,7 +106,10 @@ export function AppSidebar({ conversations, user }: IAppSidebar) {
               to="/conversations"
               className="group-data-[collapsible=icon]:flex-1"
             >
-              <SidebarButton title="New chat">
+              <SidebarButton
+                title="New chat"
+                onClick={() => useCreateConversationMutation.mutate()}
+              >
                 <Plus />
                 <span className="group-data-[collapsible=icon]:hidden">New chat</span>
               </SidebarButton>
@@ -99,16 +137,30 @@ export function AppSidebar({ conversations, user }: IAppSidebar) {
       </SidebarHeader>
 
       <SidebarContent className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        {conversations.pinned.length > 0 && (
-          <NavigationGroup
-            label="Pinned"
-            conversations={conversations.pinned}
-          />
+        {isLoading ? (
+          <div className="flex h-full items-center justify-center">
+            <Spinner />
+          </div>
+        ) : isError ? (
+          <div className="flex h-full items-center justify-center">
+            <span className="text-destructive text-center">
+              {error instanceof Error ? error.message : 'Something went wrong'}
+            </span>
+          </div>
+        ) : (
+          <>
+            {data.pinned.length > 0 && (
+              <NavigationGroup
+                label="Pinned"
+                conversations={data.pinned}
+              />
+            )}
+            <NavigationGroup
+              label="Recents"
+              conversations={data.recents}
+            />
+          </>
         )}
-        <NavigationGroup
-          label="Recents"
-          conversations={conversations.recents}
-        />
       </SidebarContent>
 
       <SidebarFooter className="mb-1 shrink-0 p-3">
@@ -152,7 +204,7 @@ export function AppSidebar({ conversations, user }: IAppSidebar) {
             <SidebarButton
               title="Log out"
               className="hover:text-destructive"
-              onClick={signOut}
+              onClick={auth.logout}
             >
               <LogOut />
               <span className="group-data-[collapsible=icon]:hidden">Logout</span>
@@ -181,7 +233,12 @@ function NavigationGroup({
         onClick={() => setIsCollapsed(collapsed => !collapsed)}
       >
         <span>{label}</span>
-        <ChevronDown className={cn('transition-transform', isCollapsed && '-rotate-90')} />
+        <ChevronDown
+          className={cn(
+            'hidden transition-transform group-hover:block',
+            isCollapsed && '-rotate-90'
+          )}
+        />
       </SidebarGroupLabel>
 
       <SidebarGroupContent className={cn('overflow-hidden', isCollapsed && 'hidden')}>
@@ -189,17 +246,24 @@ function NavigationGroup({
           {conversations.map(c => {
             return (
               <SidebarMenuItem key={c.id}>
-                <SidebarMenuButton
-                  tooltip={c.title}
-                  render={
-                    <Link
-                      params={{ id: c.id }}
-                      to={'/conversations/$id'}
-                    />
-                  }
-                >
-                  {c.title}
-                </SidebarMenuButton>
+                <div className="hover:bg-accent flex w-full items-center rounded-md">
+                  <SidebarMenuButton
+                    tooltip={c.title}
+                    render={
+                      <Link
+                        params={{ id: c.id }}
+                        to={'/conversations/$id'}
+                      />
+                    }
+                  >
+                    <span className="truncate">{c.title}</span>
+                  </SidebarMenuButton>
+                  <ActionsMenu
+                    id={c.id}
+                    isPinned={c.isPinned}
+                    title={c.title}
+                  />
+                </div>
               </SidebarMenuItem>
             );
           })}
@@ -232,5 +296,98 @@ function SidebarButton({
     >
       {children}
     </Button>
+  );
+}
+
+function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; title: string }) {
+  const [conversationTitle, setConversationTitle] = useState(title);
+  const updateConversationMutation = useUpdateConversation(id);
+  const deleteConversationMutation = useDeleteConversation();
+
+  return (
+    <Dialog>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-foreground shrink-0 hover:flex"
+            >
+              <Ellipsis />
+            </Button>
+          }
+        />
+
+        <DropdownMenuContent>
+          <DialogTrigger
+            render={
+              <DropdownMenuItem className="cursor-pointer">
+                <Pencil />
+                <span>Rename</span>
+              </DropdownMenuItem>
+            }
+          />
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => updateConversationMutation.mutate({ isPinned: !isPinned })}
+          >
+            {isPinned ? <PinOff /> : <PinIcon />}
+            <span>{isPinned ? 'Unpin' : 'Pin'}</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => updateConversationMutation.mutate({ isArchived: true })}
+          >
+            <Archive />
+            <span>Archive</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            variant="destructive"
+            className="cursor-pointer"
+            onClick={() => deleteConversationMutation.mutate(id)}
+          >
+            <Trash />
+            <span>Delete</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Rename Conversation</DialogTitle>
+          <DialogDescription>Enter a new name for this conversation</DialogDescription>
+        </DialogHeader>
+
+        <Field>
+          <Input
+            id="title"
+            name="title"
+            value={conversationTitle}
+            onChange={e => setConversationTitle(e.target.value)}
+          />
+        </Field>
+
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline">Cancel</Button>} />
+          <DialogClose
+            render={
+              <Button
+                onClick={() => updateConversationMutation.mutate({ title: conversationTitle })}
+              >
+                Update
+              </Button>
+            }
+          />
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
