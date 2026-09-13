@@ -1,15 +1,8 @@
+import { auth } from '@/api/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { authClient } from '@/lib/auth-client';
 
 export function LoginForm() {
-  async function continueWithGoogle() {
-    await authClient.signIn.social({
-      provider: 'google',
-      callbackURL: `${window.location.origin}`,
-    });
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center">
       <Card className="w-full max-w-sm">
@@ -22,7 +15,7 @@ export function LoginForm() {
             variant="outline"
             className="w-full"
             type="button"
-            onClick={continueWithGoogle}
+            onClick={auth.login}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
