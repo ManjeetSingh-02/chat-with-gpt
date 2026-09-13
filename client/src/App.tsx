@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/providers/theme-provider';
 import { routeTree } from '@/routeTree.gen';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
+import { useEffect } from 'react';
 
 // Create a new router instance
 const router = createRouter({
@@ -23,6 +24,10 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   const { data: session, isPending } = authClient.useSession();
+
+  useEffect(() => {
+    if (!isPending) router.invalidate();
+  }, [session, isPending]);
 
   if (isPending)
     return (
