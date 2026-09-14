@@ -1,4 +1,5 @@
 import { Spinner } from '@/components/ui/spinner';
+import { Toaster } from '@/components/ui/toast';
 import { authClient } from '@/lib/auth-client';
 import { queryClient } from '@/lib/query';
 import { ThemeProvider } from '@/providers/theme-provider';
@@ -43,6 +44,7 @@ export default function App() {
           router={router}
           context={{ session }}
         />
+        <Toaster />
       </ThemeProvider>
     </QueryClientProvider>
   );

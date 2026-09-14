@@ -1,6 +1,7 @@
 import { auth } from '@/api/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from '@/components/ui/toast';
 
 export function LoginForm() {
   return (
@@ -14,7 +15,15 @@ export function LoginForm() {
         <CardContent>
           <Button
             variant="outline"
-            onClick={auth.login}
+            onClick={async () =>
+              await auth.login().catch(error =>
+                toast.add({
+                  title: error.message,
+                  type: 'error',
+                  timeout: 3000,
+                })
+              )
+            }
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
