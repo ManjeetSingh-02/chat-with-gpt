@@ -2,7 +2,6 @@ import { conversations } from '@/api/conversations';
 import { conversationKeys, queryClient } from '@/lib/query';
 import type { UpdateConversationData } from '@/types/conversations';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useNavigate } from '@tanstack/react-router';
 
 export const useConversations = () => {
   const { data, isLoading, isError, error } = useQuery({
@@ -22,14 +21,9 @@ export const useConversations = () => {
 };
 
 export const useCreateConversation = () => {
-  const navigate = useNavigate();
-
   return useMutation({
     mutationFn: () => conversations.createConversation(),
-    onSuccess: ({ data }) => {
-      queryClient.invalidateQueries({ queryKey: conversationKeys.list() });
-      navigate({ to: '/conversations/$id', params: { id: data.data.id } });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: conversationKeys.list() }),
   });
 };
 

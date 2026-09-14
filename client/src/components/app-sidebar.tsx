@@ -42,7 +42,7 @@ import {
   useUpdateConversation,
 } from '@/hooks/use-conversation';
 import type { Conversation } from '@/types/conversations';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { cn } from 'cn';
 import {
   Archive,
@@ -72,6 +72,7 @@ type AppSidebarProps = {
 export function AppSidebar({ user }: AppSidebarProps) {
   const { data, isLoading, isError, error } = useConversations();
   const useCreateConversationMutation = useCreateConversation();
+  const navigate = useNavigate();
 
   return (
     <Sidebar
@@ -102,18 +103,18 @@ export function AppSidebar({ user }: AppSidebarProps) {
           <Separator className="mt-3 mb-2 group-data-[collapsible=icon]:hidden" />
 
           <div className="flex w-full gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
-            <Link
-              to="/conversations"
-              className="group-data-[collapsible=icon]:flex-1"
+            <SidebarButton
+              title="New chat"
+              onClick={() =>
+                useCreateConversationMutation.mutate(undefined, {
+                  onSuccess: ({ data }) =>
+                    navigate({ to: '/conversations/$id', params: { id: data.data.id } }),
+                })
+              }
             >
-              <SidebarButton
-                title="New chat"
-                onClick={() => useCreateConversationMutation.mutate()}
-              >
-                <Plus />
-                <span className="group-data-[collapsible=icon]:hidden">New chat</span>
-              </SidebarButton>
-            </Link>
+              <Plus />
+              <span className="group-data-[collapsible=icon]:hidden">New chat</span>
+            </SidebarButton>
 
             <Separator
               orientation="vertical"
