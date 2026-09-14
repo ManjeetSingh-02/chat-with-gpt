@@ -18,9 +18,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import {
   Sidebar,
   SidebarContent,
@@ -43,15 +49,15 @@ import {
 } from '@/hooks/use-conversation';
 import { toast } from '@/components/ui/toast';
 import type { Conversation } from '@/types/conversations';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { cn } from 'cn';
 import {
   Archive,
   Bot,
   ChevronDown,
-  Compass,
   Ellipsis,
   LogOut,
+  MessageCircle,
   Pencil,
   PinIcon,
   PinOff,
@@ -80,20 +86,16 @@ export function AppSidebar({ user }: AppSidebarProps) {
       collapsible="icon"
       variant="sidebar"
     >
-      <SidebarHeader className="mt-1 shrink-0 p-3">
-        <div className="hidden justify-center group-data-[collapsible=icon]:flex">
-          <SidebarTrigger />
-        </div>
-
-        <div>
-          <div className="flex items-center gap-3 group-data-[collapsible=icon]:hidden">
-            <Avatar className="bg-primary text-primary-foreground">
+      <SidebarHeader>
+        <div className="flex flex-col gap-2 group-data-[collapsible=icon]:items-center">
+          <div className="mb-2 flex items-center justify-between">
+            <Avatar className="bg-primary text-primary-foreground group-data-[collapsible=icon]:hidden">
               <AvatarFallback className="bg-transparent text-inherit">
                 <Bot />
               </AvatarFallback>
             </Avatar>
 
-            <div className="min-w-0 flex-1">
+            <div className="group-data-[collapsible=icon]:hidden">
               <p className="truncate text-base font-medium">Chat with GPT</p>
               <p className="text-muted-foreground truncate text-xs">Your thinking partner</p>
             </div>
@@ -101,63 +103,56 @@ export function AppSidebar({ user }: AppSidebarProps) {
             <SidebarTrigger />
           </div>
 
-          <Separator className="mt-3 mb-2 group-data-[collapsible=icon]:hidden" />
+          <SidebarButton
+            title="View Conversations"
+            onClick={() => navigate({ to: '/conversations' })}
+          >
+            <MessageCircle />
+            <span className="group-data-[collapsible=icon]:hidden">View Conversations</span>
+          </SidebarButton>
 
-          <div className="flex w-full gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
-            <SidebarButton
-              title="New chat"
-              onClick={() =>
-                useCreateConversationMutation.mutate(undefined, {
-                  onError: error =>
-                    toast.add({
-                      title: error.message,
-                      type: 'error',
-                      timeout: 3000,
-                    }),
-                  onSuccess: ({ data }) =>
-                    navigate({
-                      to: '/conversations/$id',
-                      params: { id: data.data.id },
-                    }),
-                })
-              }
-            >
-              <Plus />
-              <span className="group-data-[collapsible=icon]:hidden">New chat</span>
-            </SidebarButton>
-
-            <Separator
-              orientation="vertical"
-              className="group-data-[collapsible=icon]:hidden"
-            />
-            <Separator
-              orientation="horizontal"
-              className="hidden group-data-[collapsible=icon]:block"
-            />
-            <Link
-              to="/conversations"
-              className="group-data-[collapsible=icon]:flex-1"
-            >
-              <SidebarButton title="Explore">
-                <Compass />
-                <span className="group-data-[collapsible=icon]:hidden">Explore</span>
-              </SidebarButton>
-            </Link>
-          </div>
+          <SidebarButton
+            title="New Conversation"
+            onClick={() =>
+              useCreateConversationMutation.mutate(undefined, {
+                onError: error =>
+                  toast.add({
+                    title: error.message,
+                    type: 'error',
+                    timeout: 3000,
+                  }),
+                onSuccess: ({ data }) =>
+                  navigate({ to: '/conversations/$id', params: { id: data.data.id } }),
+              })
+            }
+          >
+            <Plus />
+            <span className="group-data-[collapsible=icon]:hidden">New Conversation</span>
+          </SidebarButton>
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <SidebarContent className="no-scrollbar flex-1 overflow-y-auto overscroll-contain">
         {isLoading ? (
-          <div className="flex h-full items-center justify-center">
+          <div className="flex h-full items-center justify-center group-data-[collapsible=icon]:hidden">
             <Spinner />
           </div>
         ) : isError ? (
-          <div className="flex h-full items-center justify-center">
+          <div className="flex h-full items-center justify-center group-data-[collapsible=icon]:hidden">
             <span className="text-destructive text-center">
               {error instanceof Error ? error.message : 'Something went wrong'}
             </span>
           </div>
+        ) : data.pinned.length === 0 && data.recents.length === 0 ? (
+          <Empty className="group-data-[collapsible=icon]:hidden">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <MessageCircle />
+              </EmptyMedia>
+              <EmptyTitle>No conversations</EmptyTitle>
+              <EmptyDescription>Start a new conversation to see it here</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <>
             {data.pinned.length > 0 && (
@@ -174,9 +169,9 @@ export function AppSidebar({ user }: AppSidebarProps) {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="mb-1 shrink-0 p-3">
-        <div>
-          <div className="flex items-center gap-3 group-data-[collapsible=icon]:hidden">
+      <SidebarFooter>
+        <div className="flex flex-col gap-2 group-data-[collapsible=icon]:items-center">
+          <div className="mb-2 flex items-center gap-2 group-data-[collapsible=icon]:hidden">
             <Avatar className="bg-primary text-primary-foreground">
               <AvatarImage src={user.image ?? undefined} />
               <AvatarFallback className="bg-transparent text-inherit">
@@ -184,60 +179,45 @@ export function AppSidebar({ user }: AppSidebarProps) {
               </AvatarFallback>
             </Avatar>
 
-            <div className="min-w-0 flex-1">
+            <div className="group-data-[collapsible=icon]:hidden">
               <p className="truncate text-base font-medium">{user.name}</p>
               <p className="text-muted-foreground truncate text-xs">{user.email}</p>
             </div>
           </div>
 
-          <Separator className="mt-3 mb-2 group-data-[collapsible=icon]:hidden" />
+          <SidebarButton
+            title="Settings"
+            onClick={() => navigate({ to: '/settings' })}
+          >
+            <Settings />
+            <span className="group-data-[collapsible=icon]:hidden">Settings</span>
+          </SidebarButton>
 
-          <div className="flex w-full gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:items-center">
-            <Link
-              to="/settings"
-              className="group-data-[collapsible=icon]:flex-1"
-            >
-              <SidebarButton title="Settings">
-                <Settings />
-                <span className="group-data-[collapsible=icon]:hidden">Settings</span>
-              </SidebarButton>
-            </Link>
-
-            <Separator
-              orientation="vertical"
-              className="group-data-[collapsible=icon]:hidden"
-            />
-            <Separator
-              orientation="horizontal"
-              className="hidden group-data-[collapsible=icon]:block"
-            />
-
-            <SidebarButton
-              title="Log out"
-              className="hover:text-destructive"
-              onClick={async () =>
-                await auth
-                  .logout()
-                  .then(() =>
-                    toast.add({
-                      title: 'Logged out successfully',
-                      type: 'success',
-                      timeout: 3000,
-                    })
-                  )
-                  .catch(error =>
-                    toast.add({
-                      title: error.message,
-                      type: 'error',
-                      timeout: 3000,
-                    })
-                  )
-              }
-            >
-              <LogOut />
-              <span className="group-data-[collapsible=icon]:hidden">Logout</span>
-            </SidebarButton>
-          </div>
+          <SidebarButton
+            title="Logout"
+            className="hover:text-destructive"
+            onClick={async () =>
+              await auth
+                .logout()
+                .then(() =>
+                  toast.add({
+                    title: 'Logged out successfully',
+                    type: 'info',
+                    timeout: 3000,
+                  })
+                )
+                .catch(error =>
+                  toast.add({
+                    title: error.message,
+                    type: 'error',
+                    timeout: 3000,
+                  })
+                )
+            }
+          >
+            <LogOut />
+            <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+          </SidebarButton>
         </div>
       </SidebarFooter>
     </Sidebar>
@@ -252,6 +232,7 @@ function NavigationGroup({
   label: string;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -275,17 +256,13 @@ function NavigationGroup({
             return (
               <SidebarMenuItem key={c.id}>
                 <div className="hover:bg-accent flex w-full items-center rounded-md">
-                  <SidebarMenuButton
-                    tooltip={c.title}
-                    render={
-                      <Link
-                        params={{ id: c.id }}
-                        to={'/conversations/$id'}
-                      />
-                    }
+                  <SidebarButton
+                    title={c.title}
+                    onClick={() => navigate({ to: '/conversations/$id', params: { id: c.id } })}
                   >
+                    {c.isPinned && <PinIcon className="rotate-45" />}
                     <span className="truncate">{c.title}</span>
-                  </SidebarMenuButton>
+                  </SidebarButton>
                   <ActionsMenu
                     id={c.id}
                     isPinned={c.isPinned}
@@ -313,17 +290,13 @@ function SidebarButton({
   children: React.ReactNode;
 }) {
   return (
-    <Button
-      variant="ghost"
-      className={cn(
-        'text-muted-foreground hover:text-primary min-w-0 transition-colors group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:px-1 hover:bg-transparent',
-        className
-      )}
+    <SidebarMenuButton
       title={title}
       onClick={onClick}
+      className={cn('text-primary hover:bg-accent', className)}
     >
       {children}
-    </Button>
+    </SidebarMenuButton>
   );
 }
 
@@ -374,14 +347,14 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
                   onSuccess: () =>
                     toast.add({
                       title: `Conversation ${isPinned ? 'unpinned' : 'pinned'}`,
-                      type: 'success',
+                      type: 'info',
                       timeout: 3000,
                     }),
                 }
               )
             }
           >
-            {isPinned ? <PinOff /> : <PinIcon />}
+            {isPinned ? <PinOff className="rotate-45" /> : <PinIcon className="rotate-45" />}
             <span>{isPinned ? 'Unpin' : 'Pin'}</span>
           </DropdownMenuItem>
 
@@ -400,7 +373,7 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
                   onSuccess: () =>
                     toast.add({
                       title: 'Conversation archived',
-                      type: 'success',
+                      type: 'info',
                       timeout: 3000,
                     }),
                 }
@@ -427,7 +400,7 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
                 onSuccess: () =>
                   toast.add({
                     title: 'Conversation deleted',
-                    type: 'success',
+                    type: 'info',
                     timeout: 3000,
                   }),
               })
@@ -473,7 +446,7 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
                       onSuccess: () =>
                         toast.add({
                           title: 'Conversation renamed',
-                          type: 'success',
+                          type: 'info',
                           timeout: 3000,
                         }),
                     }
