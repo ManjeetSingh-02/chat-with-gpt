@@ -23,20 +23,26 @@ export const useConversations = () => {
 export const useCreateConversation = () => {
   return useMutation({
     mutationFn: () => conversations.createConversation(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: conversationKeys.list() }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: conversationKeys.list({ isArchived: false }) }),
   });
 };
 
 export const useUpdateConversation = (id: string) =>
   useMutation({
     mutationFn: (data: UpdateConversationData) => conversations.updateConversation(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: conversationKeys.list() }),
+    onSuccess: (_, data) => {
+      if (data.isArchived === undefined)
+        queryClient.invalidateQueries({ queryKey: conversationKeys.list({ isArchived: false }) });
+      else queryClient.invalidateQueries({ queryKey: conversationKeys.list() });
+    },
   });
 
-export const useDeleteConversation = () =>
+export const useDeleteConversation = (id: string, isArchived: boolean) =>
   useMutation({
-    mutationFn: (id: string) => conversations.deleteConversation(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: conversationKeys.list() }),
+    mutationFn: () => conversations.deleteConversation(id),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: conversationKeys.list({ isArchived }) }),
   });
 
 export const useDeleteConversations = () =>
