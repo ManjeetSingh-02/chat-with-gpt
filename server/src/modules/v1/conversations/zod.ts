@@ -28,7 +28,7 @@ export const updateConversationSchema = z.object({
   params: conversationIdParamsSchema,
   body: z
     .object({
-      title: z.string().trim().nonempty().optional(),
+      title: z.string().trim().nonempty().max(30).optional(),
       isArchived: z.boolean().optional(),
       isPinned: z.boolean().optional(),
     })

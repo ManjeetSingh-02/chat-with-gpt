@@ -468,6 +468,7 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
           <Input
             id="title"
             name="title"
+            maxLength={30}
             value={conversationTitle}
             onChange={e => setConversationTitle(e.target.value)}
           />
