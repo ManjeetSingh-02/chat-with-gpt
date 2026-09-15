@@ -20,7 +20,7 @@ export const conversations = {
     await axiosInstance.patch(`/conversations/${id}`, data),
 
   // DELETE /conversations
-  deleteAllConversations: async () => await axiosInstance.delete('/conversations'),
+  deleteConversations: async () => await axiosInstance.delete('/conversations'),
 
   // DELETE /conversations/:id
   deleteConversation: async (id: string) => await axiosInstance.delete(`/conversations/${id}`),

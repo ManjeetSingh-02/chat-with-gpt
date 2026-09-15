@@ -38,3 +38,9 @@ export const useDeleteConversation = () =>
     mutationFn: (id: string) => conversations.deleteConversation(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: conversationKeys.list() }),
   });
+
+export const useDeleteConversations = () =>
+  useMutation({
+    mutationFn: () => conversations.deleteConversations(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: conversationKeys.list() }),
+  });
