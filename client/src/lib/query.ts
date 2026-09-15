@@ -1,3 +1,4 @@
+import type { ListConversationsParams } from '@/types/conversations';
 import { QueryClient } from '@tanstack/react-query';
 
 export const queryClient = new QueryClient({
@@ -7,7 +8,6 @@ export const queryClient = new QueryClient({
     },
   },
 });
-import type { ListConversationsParams } from '@/types/conversations';
 
 export const conversationKeys = {
   all: ['conversations'] as const,
