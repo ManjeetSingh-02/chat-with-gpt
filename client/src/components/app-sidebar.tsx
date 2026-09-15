@@ -1,3 +1,4 @@
+import { ThemeSelector } from '@/components/theme-selector';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -123,15 +124,17 @@ export function AppSidebar({ user }: AppSidebarProps) {
       <SidebarHeader>
         <div className="flex flex-col gap-2 group-data-[collapsible=icon]:items-center">
           <div className="mb-2 flex items-center justify-between">
-            <Avatar className="bg-primary text-primary-foreground group-data-[collapsible=icon]:hidden">
-              <AvatarFallback className="bg-transparent text-inherit">
-                <Bot />
-              </AvatarFallback>
-            </Avatar>
+            <div className="flex items-center gap-4">
+              <Avatar className="bg-primary text-primary-foreground group-data-[collapsible=icon]:hidden">
+                <AvatarFallback className="bg-transparent text-inherit">
+                  <Bot />
+                </AvatarFallback>
+              </Avatar>
 
-            <div className="group-data-[collapsible=icon]:hidden">
-              <p className="truncate text-base font-medium">Chat with GPT</p>
-              <p className="text-muted-foreground truncate text-xs">Your thinking partner</p>
+              <div className="group-data-[collapsible=icon]:hidden">
+                <p className="truncate text-base font-medium">Chat with GPT</p>
+                <p className="text-muted-foreground truncate text-xs">Your thinking partner</p>
+              </div>
             </div>
 
             <SidebarTrigger />
@@ -194,18 +197,21 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
       <SidebarFooter>
         <div className="flex flex-col gap-2 group-data-[collapsible=icon]:items-center">
-          <div className="mb-2 flex items-center gap-2 group-data-[collapsible=icon]:hidden">
-            <Avatar className="bg-primary text-primary-foreground">
-              <AvatarImage src={user.image ?? undefined} />
-              <AvatarFallback className="bg-transparent text-inherit">
-                <User />
-              </AvatarFallback>
-            </Avatar>
-
-            <div className="group-data-[collapsible=icon]:hidden">
-              <p className="truncate text-base font-medium">{user.name}</p>
-              <p className="text-muted-foreground truncate text-xs">{user.email}</p>
+          <div className="mb-2 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar className="bg-primary text-primary-foreground group-data-[collapsible=icon]:hidden">
+                <AvatarImage src={user.image ?? undefined} />
+                <AvatarFallback className="bg-transparent text-inherit">
+                  <User />
+                </AvatarFallback>
+              </Avatar>
+              <div className="group-data-[collapsible=icon]:hidden">
+                <p className="truncate text-base font-medium">{user.name}</p>
+                <p className="text-muted-foreground truncate text-xs">Free</p>
+              </div>
             </div>
+
+            <ThemeSelector />
           </div>
 
           <SidebarButton
