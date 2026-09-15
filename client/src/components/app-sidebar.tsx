@@ -79,7 +79,7 @@ type AppSidebarProps = {
 };
 
 export function AppSidebar({ user }: AppSidebarProps) {
-  const { data, isLoading, isError, error } = useConversations(false);
+  const { data, isLoading, isError, error } = useConversations({ isArchived: false });
   const useCreateConversationMutation = useCreateConversation();
   const navigate = useNavigate();
 
@@ -133,7 +133,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
               <div className="group-data-[collapsible=icon]:hidden">
                 <p className="truncate text-base font-medium">Chat with GPT</p>
-                <p className="text-muted-foreground truncate text-xs">Your thinking partner</p>
+                <p className="text-muted-foreground truncate text-xs">Personal Assistant</p>
               </div>
             </div>
 
@@ -212,7 +212,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
               </Avatar>
               <div className="group-data-[collapsible=icon]:hidden">
                 <p className="truncate text-base font-medium">{user.name}</p>
-                <p className="text-muted-foreground truncate text-xs">Free</p>
+                <p className="text-muted-foreground truncate text-xs">Welcome Back</p>
               </div>
             </div>
 
@@ -319,12 +319,12 @@ function SidebarButton({
 
 function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; title: string }) {
   const [conversationTitle, setConversationTitle] = useState(title);
-  const updateConversationMutation = useUpdateConversation(id);
-  const deleteConversationMutation = useDeleteConversation(id, false);
+  const updateConversationMutation = useUpdateConversation();
+  const deleteConversationMutation = useDeleteConversation();
 
   function pinOrUnpinConversation() {
     return updateConversationMutation.mutate(
-      { isPinned: !isPinned },
+      { id, data: { isPinned: !isPinned } },
       {
         onSuccess: () =>
           toast.add({
@@ -344,7 +344,7 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
 
   function archiveConversation() {
     return updateConversationMutation.mutate(
-      { isArchived: true },
+      { id, data: { isArchived: true } },
       {
         onSuccess: () =>
           toast.add({
@@ -363,25 +363,28 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
   }
 
   function deleteConversation() {
-    return deleteConversationMutation.mutate(undefined, {
-      onSuccess: () =>
-        toast.add({
-          title: 'Conversation deleted',
-          type: 'success',
-          timeout: 3000,
-        }),
-      onError: error =>
-        toast.add({
-          title: error.message,
-          type: 'error',
-          timeout: 3000,
-        }),
-    });
+    return deleteConversationMutation.mutate(
+      { id, isArchived: false },
+      {
+        onSuccess: () =>
+          toast.add({
+            title: 'Conversation deleted',
+            type: 'success',
+            timeout: 3000,
+          }),
+        onError: error =>
+          toast.add({
+            title: error.message,
+            type: 'error',
+            timeout: 3000,
+          }),
+      }
+    );
   }
 
   function renameConversation() {
     return updateConversationMutation.mutate(
-      { title: conversationTitle },
+      { id, data: { title: conversationTitle } },
       {
         onSuccess: () =>
           toast.add({
