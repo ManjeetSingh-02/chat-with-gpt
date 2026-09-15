@@ -10,10 +10,6 @@ export const queryClient = new QueryClient({
 });
 
 export const conversationKeys = {
-  all: ['conversations'] as const,
-
   list: (params?: ListConversationsParams) =>
-    params
-      ? ([...conversationKeys.all, 'list', params] as const)
-      : ([...conversationKeys.all, 'list'] as const),
+    params ? (['list', params] as const) : (['list'] as const),
 };
