@@ -3,17 +3,18 @@ import { conversationKeys, queryClient } from '@/lib/query';
 import type { UpdateConversationData } from '@/types/conversations';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-export const useConversations = () => {
+export const useConversations = (isArchived: boolean) => {
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: conversationKeys.list(),
-    queryFn: () => conversations.listConversations({ isArchived: false }),
+    queryKey: conversationKeys.list({ isArchived }),
+    queryFn: () => conversations.listConversations({ isArchived }),
   });
 
+  const archived = data?.data.data ?? [];
   const pinned = data?.data.data.filter(c => c.isPinned) ?? [];
   const recents = data?.data.data.filter(c => !c.isPinned) ?? [];
 
   return {
-    data: { pinned, recents },
+    data: { archived, pinned, recents },
     isLoading,
     isError,
     error,
