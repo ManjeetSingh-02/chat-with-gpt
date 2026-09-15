@@ -1,9 +1,24 @@
-import { auth } from '@/api/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/toast';
+import { authClient } from '@/lib/auth-client';
 
 export function LoginForm() {
+  async function continueWithGoogle() {
+    try {
+      await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: `${window.location.origin}`,
+      });
+    } catch {
+      toast.add({
+        title: 'Failed to log in',
+        type: 'error',
+        timeout: 3000,
+      });
+    }
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center">
       <Card className="bg-background flex w-full flex-col items-center justify-center gap-4 ring-0">
@@ -15,15 +30,7 @@ export function LoginForm() {
         <CardContent>
           <Button
             variant="outline"
-            onClick={async () =>
-              await auth.login().catch(error =>
-                toast.add({
-                  title: error.message,
-                  type: 'error',
-                  timeout: 3000,
-                })
-              )
-            }
+            onClick={continueWithGoogle}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

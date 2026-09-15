@@ -1,4 +1,3 @@
-import { auth } from '@/api/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,13 +40,14 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Spinner } from '@/components/ui/spinner';
+import { toast } from '@/components/ui/toast';
 import {
   useConversations,
   useCreateConversation,
   useDeleteConversation,
   useUpdateConversation,
 } from '@/hooks/use-conversation';
-import { toast } from '@/components/ui/toast';
+import { authClient } from '@/lib/auth-client';
 import type { Conversation } from '@/types/conversations';
 import { useNavigate } from '@tanstack/react-router';
 import { cn } from 'cn';
@@ -57,7 +57,8 @@ import {
   ChevronDown,
   Ellipsis,
   LogOut,
-  MessageCircle,
+  MessageSquare,
+  MessagesSquare,
   Pencil,
   PinIcon,
   PinOff,
@@ -80,6 +81,39 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const { data, isLoading, isError, error } = useConversations();
   const useCreateConversationMutation = useCreateConversation();
   const navigate = useNavigate();
+
+  function createConversation() {
+    return useCreateConversationMutation.mutate(undefined, {
+      onSuccess: ({ data }) =>
+        navigate({
+          to: '/conversations/$id',
+          params: { id: data.data.id },
+        }),
+      onError: error =>
+        toast.add({
+          title: error.message,
+          type: 'error',
+          timeout: 3000,
+        }),
+    });
+  }
+
+  async function logoutUser() {
+    try {
+      await authClient.signOut();
+      toast.add({
+        title: 'Logged out successfully',
+        type: 'success',
+        timeout: 3000,
+      });
+    } catch {
+      toast.add({
+        title: 'Failed to log out',
+        type: 'error',
+        timeout: 3000,
+      });
+    }
+  }
 
   return (
     <Sidebar
@@ -107,24 +141,13 @@ export function AppSidebar({ user }: AppSidebarProps) {
             title="View Conversations"
             onClick={() => navigate({ to: '/conversations' })}
           >
-            <MessageCircle />
+            <MessagesSquare />
             <span className="group-data-[collapsible=icon]:hidden">View Conversations</span>
           </SidebarButton>
 
           <SidebarButton
             title="New Conversation"
-            onClick={() =>
-              useCreateConversationMutation.mutate(undefined, {
-                onError: error =>
-                  toast.add({
-                    title: error.message,
-                    type: 'error',
-                    timeout: 3000,
-                  }),
-                onSuccess: ({ data }) =>
-                  navigate({ to: '/conversations/$id', params: { id: data.data.id } }),
-              })
-            }
+            onClick={createConversation}
           >
             <Plus />
             <span className="group-data-[collapsible=icon]:hidden">New Conversation</span>
@@ -147,7 +170,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
           <Empty className="group-data-[collapsible=icon]:hidden">
             <EmptyHeader>
               <EmptyMedia variant="icon">
-                <MessageCircle />
+                <MessagesSquare />
               </EmptyMedia>
               <EmptyTitle>No conversations</EmptyTitle>
               <EmptyDescription>Start a new conversation to see it here</EmptyDescription>
@@ -196,24 +219,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
           <SidebarButton
             title="Logout"
             className="hover:text-destructive"
-            onClick={async () =>
-              await auth
-                .logout()
-                .then(() =>
-                  toast.add({
-                    title: 'Logged out successfully',
-                    type: 'info',
-                    timeout: 3000,
-                  })
-                )
-                .catch(error =>
-                  toast.add({
-                    title: error.message,
-                    type: 'error',
-                    timeout: 3000,
-                  })
-                )
-            }
+            onClick={logoutUser}
           >
             <LogOut />
             <span className="group-data-[collapsible=icon]:hidden">Logout</span>
@@ -260,7 +266,7 @@ function NavigationGroup({
                     title={c.title}
                     onClick={() => navigate({ to: '/conversations/$id', params: { id: c.id } })}
                   >
-                    {c.isPinned && <PinIcon className="rotate-45" />}
+                    {c.isPinned ? <PinIcon /> : <MessageSquare />}
                     <span className="truncate">{c.title}</span>
                   </SidebarButton>
                   <ActionsMenu
@@ -305,6 +311,83 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
   const updateConversationMutation = useUpdateConversation(id);
   const deleteConversationMutation = useDeleteConversation();
 
+  function pinOrUnpinConversation() {
+    return updateConversationMutation.mutate(
+      { isPinned: !isPinned },
+      {
+        onSuccess: () =>
+          toast.add({
+            title: `Conversation ${isPinned ? 'unpinned' : 'pinned'}`,
+            type: 'success',
+            timeout: 3000,
+          }),
+        onError: error =>
+          toast.add({
+            title: error.message,
+            type: 'error',
+            timeout: 3000,
+          }),
+      }
+    );
+  }
+
+  function archiveConversation() {
+    return updateConversationMutation.mutate(
+      { isArchived: true },
+      {
+        onSuccess: () =>
+          toast.add({
+            title: 'Conversation archived',
+            type: 'success',
+            timeout: 3000,
+          }),
+        onError: error =>
+          toast.add({
+            title: error.message,
+            type: 'error',
+            timeout: 3000,
+          }),
+      }
+    );
+  }
+
+  function deleteConversation() {
+    return deleteConversationMutation.mutate(id, {
+      onSuccess: () =>
+        toast.add({
+          title: 'Conversation deleted',
+          type: 'success',
+          timeout: 3000,
+        }),
+      onError: error =>
+        toast.add({
+          title: error.message,
+          type: 'error',
+          timeout: 3000,
+        }),
+    });
+  }
+
+  function renameConversation() {
+    return updateConversationMutation.mutate(
+      { title: conversationTitle },
+      {
+        onSuccess: () =>
+          toast.add({
+            title: 'Conversation renamed',
+            type: 'success',
+            timeout: 3000,
+          }),
+        onError: error =>
+          toast.add({
+            title: error.message,
+            type: 'error',
+            timeout: 3000,
+          }),
+      }
+    );
+  }
+
   return (
     <Dialog>
       <DropdownMenu>
@@ -334,25 +417,7 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
 
           <DropdownMenuItem
             className="cursor-pointer"
-            onClick={() =>
-              updateConversationMutation.mutate(
-                { isPinned: !isPinned },
-                {
-                  onError: error =>
-                    toast.add({
-                      title: error.message,
-                      type: 'error',
-                      timeout: 3000,
-                    }),
-                  onSuccess: () =>
-                    toast.add({
-                      title: `Conversation ${isPinned ? 'unpinned' : 'pinned'}`,
-                      type: 'info',
-                      timeout: 3000,
-                    }),
-                }
-              )
-            }
+            onClick={pinOrUnpinConversation}
           >
             {isPinned ? <PinOff className="rotate-45" /> : <PinIcon className="rotate-45" />}
             <span>{isPinned ? 'Unpin' : 'Pin'}</span>
@@ -360,25 +425,7 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
 
           <DropdownMenuItem
             className="cursor-pointer"
-            onClick={() =>
-              updateConversationMutation.mutate(
-                { isArchived: true },
-                {
-                  onError: error =>
-                    toast.add({
-                      title: error.message,
-                      type: 'error',
-                      timeout: 3000,
-                    }),
-                  onSuccess: () =>
-                    toast.add({
-                      title: 'Conversation archived',
-                      type: 'info',
-                      timeout: 3000,
-                    }),
-                }
-              )
-            }
+            onClick={archiveConversation}
           >
             <Archive />
             <span>Archive</span>
@@ -389,22 +436,7 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
           <DropdownMenuItem
             variant="destructive"
             className="cursor-pointer"
-            onClick={() =>
-              deleteConversationMutation.mutate(id, {
-                onError: error =>
-                  toast.add({
-                    title: error.message,
-                    type: 'error',
-                    timeout: 3000,
-                  }),
-                onSuccess: () =>
-                  toast.add({
-                    title: 'Conversation deleted',
-                    type: 'info',
-                    timeout: 3000,
-                  }),
-              })
-            }
+            onClick={deleteConversation}
           >
             <Trash />
             <span>Delete</span>
@@ -433,25 +465,7 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
             render={
               <Button
                 disabled={conversationTitle.trim().length === 0 || conversationTitle === title}
-                onClick={() =>
-                  updateConversationMutation.mutate(
-                    { title: conversationTitle },
-                    {
-                      onError: error =>
-                        toast.add({
-                          title: error.message,
-                          type: 'error',
-                          timeout: 3000,
-                        }),
-                      onSuccess: () =>
-                        toast.add({
-                          title: 'Conversation renamed',
-                          type: 'info',
-                          timeout: 3000,
-                        }),
-                    }
-                  )
-                }
+                onClick={renameConversation}
               >
                 <span>Rename</span>
               </Button>
