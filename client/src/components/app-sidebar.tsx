@@ -79,7 +79,7 @@ type AppSidebarProps = {
 };
 
 export function AppSidebar({ user }: AppSidebarProps) {
-  const { data, isLoading, isError, error } = useConversations();
+  const { data, isLoading, isError, error } = useConversations(false);
   const useCreateConversationMutation = useCreateConversation();
   const navigate = useNavigate();
 
@@ -315,7 +315,7 @@ function SidebarButton({
 function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; title: string }) {
   const [conversationTitle, setConversationTitle] = useState(title);
   const updateConversationMutation = useUpdateConversation(id);
-  const deleteConversationMutation = useDeleteConversation();
+  const deleteConversationMutation = useDeleteConversation(id, false);
 
   function pinOrUnpinConversation() {
     return updateConversationMutation.mutate(
@@ -358,7 +358,7 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
   }
 
   function deleteConversation() {
-    return deleteConversationMutation.mutate(id, {
+    return deleteConversationMutation.mutate(undefined, {
       onSuccess: () =>
         toast.add({
           title: 'Conversation deleted',
