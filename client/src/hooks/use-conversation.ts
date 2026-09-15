@@ -3,7 +3,7 @@ import { conversationKeys, queryClient } from '@/lib/query';
 import type { UpdateConversationData } from '@/types/conversations';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-export const useConversations = (isArchived: boolean) => {
+export const useConversations = ({ isArchived }: { isArchived: boolean }) => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: conversationKeys.list({ isArchived }),
     queryFn: () => conversations.listConversations({ isArchived }),
@@ -29,21 +29,25 @@ export const useCreateConversation = () => {
   });
 };
 
-export const useUpdateConversation = (id: string) =>
+export const useUpdateConversation = () =>
   useMutation({
-    mutationFn: (data: UpdateConversationData) => conversations.updateConversation(id, data),
+    mutationFn: (data: { id: string; data: UpdateConversationData }) =>
+      conversations.updateConversation(data.id, data.data),
     onSuccess: (_, data) => {
-      if (data.isArchived === undefined)
+      if (data.data.isArchived === undefined)
         queryClient.invalidateQueries({ queryKey: conversationKeys.list({ isArchived: false }) });
       else queryClient.invalidateQueries({ queryKey: conversationKeys.list() });
     },
   });
 
-export const useDeleteConversation = (id: string, isArchived: boolean) =>
+export const useDeleteConversation = () =>
   useMutation({
-    mutationFn: () => conversations.deleteConversation(id),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: conversationKeys.list({ isArchived }) }),
+    mutationFn: (data: { id: string; isArchived: boolean }) =>
+      conversations.deleteConversation(data.id),
+    onSuccess: (_, data) =>
+      queryClient.invalidateQueries({
+        queryKey: conversationKeys.list({ isArchived: data.isArchived }),
+      }),
   });
 
 export const useDeleteConversations = () =>
