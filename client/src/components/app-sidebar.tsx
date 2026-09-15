@@ -40,7 +40,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { Spinner } from '@/components/ui/spinner';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/toast';
 import {
   useConversations,
@@ -160,8 +160,13 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
       <SidebarContent className="no-scrollbar flex-1 overflow-y-auto overscroll-contain">
         {isLoading ? (
-          <div className="flex h-full items-center justify-center group-data-[collapsible=icon]:hidden">
-            <Spinner />
+          <div className="mt-4 flex flex-col items-center justify-center gap-2 group-data-[collapsible=icon]:hidden">
+            <Skeleton className="h-8 w-11/12" />
+            <Skeleton className="h-8 w-11/12" />
+            <Skeleton className="h-8 w-11/12" />
+            <Skeleton className="h-8 w-11/12" />
+            <Skeleton className="h-8 w-11/12" />
+            <Skeleton className="h-8 w-11/12" />
           </div>
         ) : isError ? (
           <div className="flex h-full items-center justify-center group-data-[collapsible=icon]:hidden">
