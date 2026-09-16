@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogClose,
@@ -23,7 +23,6 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/toast';
 import {
   useConversations,
@@ -33,7 +32,7 @@ import {
 } from '@/hooks/use-conversation';
 import { authClient } from '@/lib/auth-client';
 import { createFileRoute } from '@tanstack/react-router';
-import { ArchiveRestore, Ellipsis, MessagesSquare, Trash, User } from 'lucide-react';
+import { ArchiveRestore, Ellipsis, MessagesSquare, Trash } from 'lucide-react';
 import { useState } from 'react';
 
 export const Route = createFileRoute('/(app)/settings')({
@@ -142,241 +141,208 @@ export const Route = createFileRoute('/(app)/settings')({
 
     return (
       <div className="flex min-h-full justify-center py-10">
-        <div className="w-full max-w-2xl">
-          <div className="mb-8">
+        <div className="flex w-full max-w-2xl flex-col gap-8">
+          <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Manage your account and conversations
-            </p>
+            <p className="text-muted-foreground text-sm">Manage your account and conversations</p>
           </div>
 
-          <Tabs
-            defaultValue="conversations"
-            className="w-full"
-          >
-            <TabsList
-              variant="line"
-              className="w-full border-b"
-            >
-              <TabsTrigger
-                value="conversations"
-                className="data-[state=active]:text-foreground flex items-center gap-2"
-              >
-                <MessagesSquare />
-                <span>Conversations</span>
-              </TabsTrigger>
+          <Card>
+            <CardHeader>
+              <CardTitle>Conversation</CardTitle>
+            </CardHeader>
 
-              <TabsTrigger
-                value="account"
-                className="data-[state=active]:text-foreground flex items-center gap-2"
-              >
-                <User />
-                <span>Account</span>
-              </TabsTrigger>
-            </TabsList>
+            <Separator />
 
-            <TabsContent
-              value="conversations"
-              className="mt-6"
-            >
-              <Card>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between gap-6">
-                    <div>
-                      <p className="text-sm font-medium">Archived conversations</p>
-                      <p className="text-muted-foreground mt-1 text-sm">
-                        View your archived conversations
-                      </p>
-                    </div>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Archived conversations</p>
+                  <p className="text-muted-foreground">Manage conversations you've archived</p>
+                </div>
 
-                    <Dialog>
-                      <DialogTrigger>
-                        <Button variant="ghost">View</Button>
-                      </DialogTrigger>
+                <Dialog>
+                  <DialogTrigger render={<Button variant="ghost">Manage</Button>} />
 
-                      <DialogContent className="sm:max-w-sm">
-                        <DialogHeader>
-                          <DialogTitle>Archived Conversations</DialogTitle>
-                        </DialogHeader>
+                  <DialogContent className="sm:max-w-sm">
+                    <DialogHeader>
+                      <DialogTitle>Archived Conversations</DialogTitle>
+                    </DialogHeader>
 
-                        {isLoading ? (
-                          <div className="mt-2 flex flex-col items-center justify-center gap-2">
-                            <Skeleton className="h-8 w-full" />
-                            <Skeleton className="h-8 w-full" />
-                            <Skeleton className="h-8 w-full" />
-                            <Skeleton className="h-8 w-full" />
-                            <Skeleton className="h-8 w-full" />
-                          </div>
-                        ) : isError ? (
-                          <div className="flex items-center justify-center">
-                            <span className="text-destructive text-center">
-                              {error instanceof Error ? error.message : 'Something went wrong'}
-                            </span>
-                          </div>
-                        ) : data.archived.length === 0 ? (
-                          <Empty>
-                            <EmptyHeader>
-                              <EmptyMedia variant="icon">
-                                <MessagesSquare />
-                              </EmptyMedia>
-                              <EmptyTitle>No archived conversations</EmptyTitle>
-                            </EmptyHeader>
-                          </Empty>
-                        ) : (
-                          <Table>
-                            <TableBody>
-                              {data.archived.map(c => (
-                                <TableRow
-                                  key={c.id}
-                                  className="hover:bg-card flex items-center justify-between"
-                                >
-                                  <TableCell className="wrap-break-word">{c.title}</TableCell>
-                                  <TableCell>
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger
-                                        render={
-                                          <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="text-muted-foreground hover:text-foreground shrink-0 hover:flex"
-                                          >
-                                            <Ellipsis />
-                                          </Button>
-                                        }
-                                      />
+                    {isLoading ? (
+                      <div className="mt-2 flex flex-col items-center justify-center gap-2">
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-full" />
+                      </div>
+                    ) : isError ? (
+                      <div className="flex items-center justify-center">
+                        <span className="text-destructive text-center">
+                          {error instanceof Error ? error.message : 'Something went wrong'}
+                        </span>
+                      </div>
+                    ) : data.archived.length === 0 ? (
+                      <Empty>
+                        <EmptyHeader>
+                          <EmptyMedia variant="icon">
+                            <MessagesSquare />
+                          </EmptyMedia>
+                          <EmptyTitle>No archived conversations</EmptyTitle>
+                        </EmptyHeader>
+                      </Empty>
+                    ) : (
+                      <Table>
+                        <TableBody>
+                          {data.archived.map(c => (
+                            <TableRow
+                              key={c.id}
+                              className="hover:bg-card flex items-center justify-between"
+                            >
+                              <TableCell className="wrap-break-word">{c.title}</TableCell>
+                              <TableCell>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger
+                                    render={
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-muted-foreground hover:text-foreground"
+                                      >
+                                        <Ellipsis />
+                                      </Button>
+                                    }
+                                  />
 
-                                      <DropdownMenuContent>
-                                        <DropdownMenuItem
-                                          className="cursor-pointer"
-                                          onClick={() => restoreConversation(c.id)}
-                                        >
-                                          <ArchiveRestore />
-                                          <span>Restore</span>
-                                        </DropdownMenuItem>
+                                  <DropdownMenuContent>
+                                    <DropdownMenuItem
+                                      className="cursor-pointer"
+                                      onClick={() => restoreConversation(c.id)}
+                                    >
+                                      <ArchiveRestore />
+                                      <span>Restore</span>
+                                    </DropdownMenuItem>
 
-                                        <DropdownMenuSeparator />
+                                    <DropdownMenuSeparator />
 
-                                        <DropdownMenuItem
-                                          variant="destructive"
-                                          className="cursor-pointer"
-                                          onClick={() => deleteConversation(c.id)}
-                                        >
-                                          <Trash />
-                                          <span>Delete</span>
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        )}
-                      </DialogContent>
-                    </Dialog>
-                  </div>
+                                    <DropdownMenuItem
+                                      variant="destructive"
+                                      className="cursor-pointer"
+                                      onClick={() => deleteConversation(c.id)}
+                                    >
+                                      <Trash />
+                                      <span>Delete</span>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </DialogContent>
+                </Dialog>
+              </div>
 
-                  <Separator />
+              <Separator />
 
-                  <div className="flex items-center justify-between gap-6">
-                    <div>
-                      <p className="text-sm font-medium">Delete conversations</p>
-                      <p className="text-muted-foreground mt-1 text-sm">
-                        Permanently delete all your conversations
-                      </p>
-                    </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Delete conversations</p>
+                  <p className="text-muted-foreground">Permanently delete all your conversations</p>
+                </div>
 
-                    <Button
-                      variant="ghost"
-                      className="text-primary hover:text-destructive"
-                      onClick={deleteConversations}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                <Button
+                  variant="ghost"
+                  className="text-primary hover:text-destructive"
+                  onClick={deleteConversations}
+                >
+                  Delete
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-            <TabsContent
-              value="account"
-              className="mt-6"
-            >
-              <Card>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Name</p>
-                      <p className="text-muted-foreground mt-1 text-sm">{user.name}</p>
-                    </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Account</CardTitle>
+            </CardHeader>
 
-                    <Dialog>
-                      <DialogTrigger>
-                        <Button variant="ghost">Edit</Button>
-                      </DialogTrigger>
+            <Separator />
 
-                      <DialogContent className="sm:max-w-sm">
-                        <DialogHeader>
-                          <DialogTitle>Update Name</DialogTitle>
-                          <DialogDescription>Enter a new name for your account</DialogDescription>
-                        </DialogHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Name</p>
+                  <p className="text-muted-foreground">{user.name}</p>
+                </div>
 
-                        <Field>
-                          <Input
-                            id="name"
-                            name="name"
-                            maxLength={20}
-                            value={userName}
-                            onChange={e => setUserName(e.target.value)}
-                          />
-                        </Field>
+                <Dialog>
+                  <DialogTrigger render={<Button variant="ghost">Edit</Button>} />
 
-                        <DialogFooter>
-                          <DialogClose render={<Button variant="outline">Cancel</Button>} />
-                          <DialogClose
-                            render={
-                              <Button
-                                disabled={userName.trim().length === 0 || userName === user.name}
-                                onClick={updateUserName}
-                              >
-                                <span>Rename</span>
-                              </Button>
-                            }
-                          />
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
+                  <DialogContent className="sm:max-w-sm">
+                    <DialogHeader>
+                      <DialogTitle>Update Name</DialogTitle>
+                      <DialogDescription>Enter a new name for your account</DialogDescription>
+                    </DialogHeader>
 
-                  <Separator />
+                    <Field>
+                      <Input
+                        id="name"
+                        name="name"
+                        maxLength={20}
+                        value={userName}
+                        onChange={e => setUserName(e.target.value)}
+                      />
+                    </Field>
 
-                  <div>
-                    <p className="text-sm font-medium">Email</p>
-                    <p className="text-muted-foreground mt-1 text-sm">{user.email}</p>
-                  </div>
+                    <DialogFooter>
+                      <DialogClose render={<Button variant="outline">Cancel</Button>} />
 
-                  <Separator />
+                      <DialogClose
+                        render={
+                          <Button
+                            disabled={userName.trim().length === 0 || userName === user.name}
+                            onClick={updateUserName}
+                          >
+                            Rename
+                          </Button>
+                        }
+                      />
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
 
-                  <div className="flex items-center justify-between gap-6">
-                    <div>
-                      <p className="text-sm font-medium">Delete account</p>
-                      <p className="text-muted-foreground mt-1 text-sm">
-                        Permanently delete your account and all of its data
-                      </p>
-                    </div>
+              <Separator />
 
-                    <Button
-                      variant="ghost"
-                      className="text-primary hover:text-destructive"
-                      onClick={deleteAccount}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+              <div>
+                <p className="text-sm font-medium">Email</p>
+                <p className="text-muted-foreground">{user.email}</p>
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Delete account</p>
+                  <p className="text-muted-foreground">
+                    Permanently delete your account and all of its data
+                  </p>
+                </div>
+
+                <Button
+                  variant="ghost"
+                  className="text-primary hover:text-destructive"
+                  onClick={deleteAccount}
+                >
+                  Delete
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
