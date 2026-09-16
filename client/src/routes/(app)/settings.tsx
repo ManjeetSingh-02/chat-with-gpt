@@ -162,7 +162,16 @@ export const Route = createFileRoute('/(app)/settings')({
                 </div>
 
                 <Dialog>
-                  <DialogTrigger render={<Button variant="ghost">Manage</Button>} />
+                  <DialogTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        Manage
+                      </Button>
+                    }
+                  />
 
                   <DialogContent className="sm:max-w-sm">
                     <DialogHeader>
@@ -256,7 +265,7 @@ export const Route = createFileRoute('/(app)/settings')({
 
                 <Button
                   variant="ghost"
-                  className="text-primary hover:text-destructive"
+                  className="text-muted-foreground hover:text-destructive"
                   onClick={deleteConversations}
                 >
                   Delete
@@ -280,7 +289,16 @@ export const Route = createFileRoute('/(app)/settings')({
                 </div>
 
                 <Dialog>
-                  <DialogTrigger render={<Button variant="ghost">Edit</Button>} />
+                  <DialogTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        Edit
+                      </Button>
+                    }
+                  />
 
                   <DialogContent className="sm:max-w-sm">
                     <DialogHeader>
@@ -335,7 +353,7 @@ export const Route = createFileRoute('/(app)/settings')({
 
                 <Button
                   variant="ghost"
-                  className="text-primary hover:text-destructive"
+                  className="text-muted-foreground hover:text-destructive"
                   onClick={deleteAccount}
                 >
                   Delete

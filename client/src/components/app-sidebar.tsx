@@ -39,6 +39,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/toast';
@@ -50,7 +51,7 @@ import {
 } from '@/hooks/use-conversation';
 import { authClient } from '@/lib/auth-client';
 import type { Conversation } from '@/types/conversations';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { cn } from 'cn';
 import {
   Archive,
@@ -58,7 +59,6 @@ import {
   ChevronDown,
   Ellipsis,
   LogOut,
-  MessageSquare,
   MessagesSquare,
   Pencil,
   PinIcon,
@@ -82,6 +82,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const { data, isLoading, isError, error } = useConversations({ isArchived: false });
   const useCreateConversationMutation = useCreateConversation();
   const navigate = useNavigate();
+  const { state } = useSidebar();
 
   function createConversation() {
     return useCreateConversationMutation.mutate(undefined, {
@@ -137,7 +138,10 @@ export function AppSidebar({ user }: AppSidebarProps) {
               </div>
             </div>
 
-            <SidebarTrigger />
+            <SidebarTrigger
+              title={state === 'collapsed' ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="text-muted-foreground hover:text-foreground"
+            />
           </div>
 
           <SidebarButton
@@ -250,6 +254,7 @@ function NavigationGroup({
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
+  const { id } = useParams({ strict: false });
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -268,27 +273,30 @@ function NavigationGroup({
       </SidebarGroupLabel>
 
       <SidebarGroupContent className={cn('overflow-hidden', isCollapsed && 'hidden')}>
-        <SidebarMenu>
-          {conversations.map(c => {
-            return (
-              <SidebarMenuItem key={c.id}>
-                <div className="hover:bg-accent flex w-full items-center rounded-md">
-                  <SidebarButton
-                    title={c.title}
-                    onClick={() => navigate({ to: '/conversations/$id', params: { id: c.id } })}
-                  >
-                    {c.isPinned ? <PinIcon /> : <MessageSquare />}
-                    <span className="truncate">{c.title}</span>
-                  </SidebarButton>
-                  <ActionsMenu
-                    id={c.id}
-                    isPinned={c.isPinned}
-                    title={c.title}
-                  />
-                </div>
-              </SidebarMenuItem>
-            );
-          })}
+        <SidebarMenu className="flex flex-col gap-2">
+          {conversations.map(c => (
+            <SidebarMenuItem
+              className={cn(
+                'text-muted-foreground hover:text-foreground flex w-full items-center rounded-md',
+                c.id === id ? 'bg-accent' : 'hover:bg-accent'
+              )}
+              key={c.id}
+            >
+              <SidebarButton
+                title={c.title}
+                className={c.id === id ? 'text-foreground' : 'text-inherit'}
+                onClick={() => navigate({ to: '/conversations/$id', params: { id: c.id } })}
+              >
+                {c.isPinned && <PinIcon />}
+                <span className="truncate">{c.title}</span>
+              </SidebarButton>
+              <ActionsMenu
+                id={c.id}
+                isPinned={c.isPinned}
+                title={c.title}
+              />
+            </SidebarMenuItem>
+          ))}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
@@ -310,7 +318,7 @@ function SidebarButton({
     <SidebarMenuButton
       title={title}
       onClick={onClick}
-      className={cn('text-primary hover:bg-accent', className)}
+      className={cn('text-muted-foreground hover:text-foreground', className)}
     >
       {children}
     </SidebarMenuButton>
