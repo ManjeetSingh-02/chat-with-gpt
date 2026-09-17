@@ -223,6 +223,7 @@ export const controller = {
     const stream = toUIMessageStream({
       stream: result.stream,
       originalMessages: validatedMessages,
+      generateMessageId: () => crypto.randomUUID(),
       onEnd: async ({ messages }) => {
         for (const m of messages) {
           await prisma.message.upsert({
