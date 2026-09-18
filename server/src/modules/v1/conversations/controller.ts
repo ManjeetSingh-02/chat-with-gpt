@@ -19,6 +19,7 @@ import type {
 import { openai } from '@ai-sdk/openai';
 import {
   convertToModelMessages,
+  generateText,
   pipeUIMessageStreamToResponse,
   streamText,
   toUIMessageStream,
@@ -187,7 +188,7 @@ export const controller = {
     response: Response
   ) => {
     // find all messages
-    const messages = await prisma.message.findMany({
+    const allMessages = await prisma.message.findMany({
       where: {
         conversationId: request.validated.params.id,
       },
@@ -203,7 +204,7 @@ export const controller = {
 
     // validate all the messages and the new message
     const validatedMessages = await validateUIMessages({
-      messages: [...messages, request.validated.body.message],
+      messages: [...allMessages, request.validated.body.message],
     });
 
     // convert the validated messages to model messages
@@ -225,6 +226,19 @@ export const controller = {
       originalMessages: validatedMessages,
       generateMessageId: () => crypto.randomUUID(),
       onEnd: async ({ messages }) => {
+        if (!allMessages.length) {
+          const res = await generateText({
+            model: openai(OPENAI_CONFIG.model),
+            system: OPENAI_CONFIG.TITLE_UPDATE_PROMPT,
+            prompt: JSON.stringify(request.validated.body.message),
+          });
+
+          await prisma.conversation.update({
+            where: { id: request.validated.params.id },
+            data: { title: res.text },
+          });
+        }
+
         for (const m of messages) {
           await prisma.message.upsert({
             where: {
