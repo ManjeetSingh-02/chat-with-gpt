@@ -19,3 +19,20 @@ OPENAI_API_KEY=<your-openai-api-key>
 VITE_API_URL=<your-api-url>
 VITE_AUTH_URL=<your-better-auth-url>
 ```
+## For Start (Server)
+```
+cd server
+pnpm install
+pnpm approve-builds (if needed)
+docker compose up -d
+pnpm prisma migrate dev
+pnpm prisma generate
+pnpm dev
+```
+
+## For Start (Client)
+```
+pnpm install
+pnpm approve-builds (if needed)
+pnpm dev
+```
