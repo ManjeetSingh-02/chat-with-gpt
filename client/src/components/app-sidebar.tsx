@@ -55,7 +55,6 @@ import { useNavigate, useParams } from '@tanstack/react-router';
 import { cn } from 'cn';
 import {
   Archive,
-  Bot,
   ChevronDown,
   Ellipsis,
   LogOut,
@@ -65,6 +64,7 @@ import {
   PinOff,
   Plus,
   Settings,
+  SparklesIcon,
   Trash,
   User,
 } from 'lucide-react';
@@ -79,7 +79,7 @@ type AppSidebarProps = {
 };
 
 export function AppSidebar({ user }: AppSidebarProps) {
-  const { data, isLoading, isError, error } = useConversations({ isArchived: false });
+  const { data, meta, isLoading, isError, error } = useConversations({ isArchived: false });
   const useCreateConversationMutation = useCreateConversation();
   const navigate = useNavigate();
   const { state } = useSidebar();
@@ -128,7 +128,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
             <div className="flex items-center gap-4">
               <Avatar className="bg-primary text-primary-foreground group-data-[collapsible=icon]:hidden">
                 <AvatarFallback className="bg-transparent text-inherit">
-                  <Bot />
+                  <SparklesIcon className="size-4" />
                 </AvatarFallback>
               </Avatar>
 
@@ -178,7 +178,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
               {error instanceof Error ? error.message : 'Something went wrong'}
             </span>
           </div>
-        ) : data.pinned.length === 0 && data.recents.length === 0 ? (
+        ) : meta.total === 0 ? (
           <Empty className="group-data-[collapsible=icon]:hidden">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -329,6 +329,8 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
   const [conversationTitle, setConversationTitle] = useState(title);
   const updateConversationMutation = useUpdateConversation();
   const deleteConversationMutation = useDeleteConversation();
+  const navigate = useNavigate();
+  const { id: cid } = useParams({ strict: false });
 
   function pinOrUnpinConversation() {
     return updateConversationMutation.mutate(
@@ -374,12 +376,15 @@ function ActionsMenu({ id, isPinned, title }: { id: string; isPinned: boolean; t
     return deleteConversationMutation.mutate(
       { id, isArchived: false },
       {
-        onSuccess: () =>
+        onSuccess: () => {
+          if (cid === id) navigate({ to: '/conversations' });
+
           toast.add({
             title: 'Conversation deleted',
             type: 'success',
             timeout: 3000,
-          }),
+          });
+        },
         onError: error =>
           toast.add({
             title: error.message,
