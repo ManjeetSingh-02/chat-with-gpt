@@ -12,4 +12,6 @@ export const queryClient = new QueryClient({
 export const conversationKeys = {
   list: (params?: ListConversationsParams) =>
     params ? (['list', params] as const) : (['list'] as const),
+
+  messages: (cid: string) => ['messages', cid] as const,
 };

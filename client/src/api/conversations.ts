@@ -3,6 +3,7 @@ import type {
   CreateConversationResponse,
   ListConversationsParams,
   ListConversationsResponse,
+  ListMessagesResponse,
   UpdateConversationData,
 } from '@/types/conversations';
 
@@ -10,6 +11,10 @@ export const conversations = {
   // GET /conversations
   listConversations: async (params?: ListConversationsParams) =>
     await axiosInstance.get<ListConversationsResponse>('/conversations', { params }),
+
+  // GET /conversations/:id
+  listMessages: async (id: string) =>
+    await axiosInstance.get<ListMessagesResponse>(`/conversations/${id}`),
 
   // POST /conversations
   createConversation: async () =>

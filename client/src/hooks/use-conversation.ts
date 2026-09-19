@@ -14,7 +14,22 @@ export const useConversations = ({ isArchived }: { isArchived: boolean }) => {
   const recents = data?.data.data.filter(c => !c.isPinned) ?? [];
 
   return {
+    meta: data?.data.meta ?? { total: 0, pinned: 0, archived: 0 },
     data: { archived, pinned, recents },
+    isLoading,
+    isError,
+    error,
+  };
+};
+
+export const useConversation = ({ id }: { id: string }) => {
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: conversationKeys.messages(id),
+    queryFn: () => conversations.listMessages(id),
+  });
+
+  return {
+    data: data?.data.data ?? [],
     isLoading,
     isError,
     error,

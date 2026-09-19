@@ -1,3 +1,5 @@
+import type { UIMessage } from 'ai';
+
 export type Conversation = {
   id: string;
   isArchived: boolean;
@@ -30,4 +32,8 @@ export type UpdateConversationData = {
   title?: string;
   isPinned?: boolean;
   isArchived?: boolean;
+};
+
+export type ListMessagesResponse = {
+  data: UIMessage[];
 };
